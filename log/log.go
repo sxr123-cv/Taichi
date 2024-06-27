@@ -19,7 +19,8 @@ func NewLog(client LogClient, sever LogServer) *Log {
 		if err != nil {
 			return nil
 		}
-		sever = &DefaultServer{file: create}
+		sever = &DefaultServer{file: create, T: make(chan string)}
+		sever.Print()
 	}
 	return &Log{LogClient: client, Server: sever}
 }
@@ -28,7 +29,7 @@ type DefaultClient struct {
 }
 
 func (receiver *DefaultClient) INFO(M ...any) string {
-	var s string
+	s := fmt.Sprintf("%s")
 	for _, m := range M {
 		v, ok := m.(LogType)
 		if ok {
@@ -54,15 +55,26 @@ func (receiver *DefaultClient) ERROR(M ...any) string {
 
 type DefaultServer struct {
 	file *os.File
+	T    chan string
 }
 
 func (d *DefaultServer) Out(string2 string) {
-	println(string2)
-	_, err := d.file.WriteString(string2)
-	if err != nil {
-		println(err.Error())
-	}
-
+	d.T <- string2
+}
+func (d *DefaultServer) Print() {
+	go func() {
+		defer close(d.T)
+		for {
+			v, ok := <-d.T
+			if ok {
+				fmt.Println(v)
+				_, err := d.file.WriteString(v)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+			}
+		}
+	}()
 }
 
 func (receiver *Log) INFO(M ...any) {
