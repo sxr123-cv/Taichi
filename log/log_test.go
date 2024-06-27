@@ -1,27 +1,21 @@
 package log
 
 import (
+	"sync"
 	"testing"
 )
 
 func TestLog_INFO(t *testing.T) {
 	L := NewLog(nil, nil)
-	for i := 0; i < 2700; i++ {
+	wait := sync.WaitGroup{}
+	for i := 0; i < 100; i++ {
 		i := i
+		wait.Add(1)
 		go func() {
 			L.ERROR(i, "info")
+			wait.Done()
 		}()
 	}
-	for {
-
-	}
-
-}
-
-func TestLog_INFO2(t *testing.T) {
-
-}
-
-func TestLog_INFO3(t *testing.T) {
+	wait.Wait()
 
 }

@@ -13,4 +13,5 @@ type LogClient interface {
 
 type LogServer interface {
 	Out(log string)
+	Print()
 }
