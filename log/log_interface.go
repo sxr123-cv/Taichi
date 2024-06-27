@@ -6,6 +6,8 @@ type LogType interface {
 
 type LogClient interface {
 	INFO(...any) string
+	WARN(...any) string
+	DEBUG(...any) string
 	ERROR(...any) string
 }
 

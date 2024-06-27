@@ -1,14 +1,19 @@
 package log
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestLog_INFO(t *testing.T) {
 	L := NewLog(nil, nil)
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 2700; i++ {
 		i := i
 		go func() {
-			L.INFO(i, "info")
+			L.ERROR(i, "info")
 		}()
+	}
+	for {
+
 	}
 
 }
