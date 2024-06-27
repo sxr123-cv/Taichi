@@ -2,46 +2,75 @@ package log
 
 import (
 	"fmt"
-	"time"
+	"os"
 )
 
 type Log struct {
-	Level       string
-	StdoutLevel int
-	Msg         string
-	Get         func(a string)
+	LogClient
+	Server LogServer
 }
 
-func (l Log) Out(msg string) {
-	fmt.Printf("[%s][%s]:%s\n", time.Now().Format("2006-01-02 15:04:05"), l.Level, msg)
+func NewLog(client LogClient, sever LogServer) *Log {
+	if client == nil {
+		client = &DefaultClient{}
+	}
+	if sever == nil {
+		create, err := os.Create("./taichi.log")
+		if err != nil {
+			return nil
+		}
+		sever = &DefaultServer{file: create}
+	}
+	return &Log{LogClient: client, Server: sever}
 }
 
-type Children struct {
-	Log
+type DefaultClient struct {
 }
 
-func (l Children) Out(msg string) {
-	fmt.Printf("[%s][%s]:%s\n", l.Level, time.Now().Format("2006-01-02 15:04:05"), msg)
+func (receiver *DefaultClient) INFO(M ...any) string {
+	var s string
+	for _, m := range M {
+		v, ok := m.(LogType)
+		if ok {
+			s += fmt.Sprintf("[INFO]%s\n", v.GetLog())
+		} else {
+			s += fmt.Sprintf("[INFO]%+v\n", m)
+		}
+	}
+	return s
+}
+func (receiver *DefaultClient) ERROR(M ...any) string {
+	var s string
+	for _, m := range M {
+		v, ok := m.(LogType)
+		if ok {
+			s += fmt.Sprintf("[ERROR]%s\n", v.GetLog())
+		} else {
+			s += fmt.Sprintf("[ERROR]%+v\n", m)
+		}
+	}
+	return s
 }
 
-var L Children
-
-func INFO(msg string) {
-	L.Level = "INFO"
-	L.Out(msg)
+type DefaultServer struct {
+	file *os.File
 }
 
-func ERROR(msg string) {
-	L.Level = "ERROR"
-	L.Out(msg)
+func (d *DefaultServer) Out(string2 string) {
+	println(string2)
+	_, err := d.file.WriteString(string2)
+	if err != nil {
+		println(err.Error())
+	}
+
 }
 
-func DEBUG(msg string) {
-	L.Level = "DEBUG"
-	L.Out(msg)
-}
+func (receiver *Log) INFO(M ...any) {
+	log := receiver.LogClient.INFO(M...)
+	receiver.Server.Out(log)
 
-func WARN(msg string) {
-	L.Level = "WARN"
-	L.Out(msg)
+}
+func (receiver *Log) ERROR(M ...any) {
+	log := receiver.LogClient.ERROR(M...)
+	receiver.Server.Out(log)
 }
