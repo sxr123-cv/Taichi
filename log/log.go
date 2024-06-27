@@ -3,6 +3,7 @@ package log
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 type Log struct {
@@ -28,25 +29,25 @@ type DefaultClient struct {
 }
 
 func (receiver *DefaultClient) INFO(M ...any) string {
-	var s string
+	var s = fmt.Sprintf("[INFO] %s", time.Now().Format("2006-01-02 15:04:05"))
 	for _, m := range M {
 		v, ok := m.(LogType)
 		if ok {
-			s += fmt.Sprintf("[INFO]%s\n", v.GetLog())
+			s += fmt.Sprintf("%s\n", v.GetLog())
 		} else {
-			s += fmt.Sprintf("[INFO]%+v\n", m)
+			s += fmt.Sprintf("%+v\n", m)
 		}
 	}
 	return s
 }
 func (receiver *DefaultClient) ERROR(M ...any) string {
-	var s string
+	var s = fmt.Sprintf("[ERROR] %s", time.Now().Format("2006-01-02 15:04:05"))
 	for _, m := range M {
 		v, ok := m.(LogType)
 		if ok {
-			s += fmt.Sprintf("[ERROR]%s\n", v.GetLog())
+			s += fmt.Sprintf("%s\n", v.GetLog())
 		} else {
-			s += fmt.Sprintf("[ERROR]%+v\n", m)
+			s += fmt.Sprintf("%+v\n", m)
 		}
 	}
 	return s
