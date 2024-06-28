@@ -1,16 +1,20 @@
 package log
 
-import "os"
+import (
+	"fmt"
+	"os"
+)
 
 type DefaultServer struct {
 	file *os.File
 	path string
 }
 
-func (d *DefaultServer) Out(string2 string) {
-	_, err := d.file.WriteString(string2)
+func (d *DefaultServer) Out(msg string) {
+	fmt.Printf(msg)
+	_, err := d.file.WriteString(msg)
 	if err != nil {
-		println(err.Error())
+		println("log write error")
 	}
 }
 func (d *DefaultServer) FilePath(path string) {
