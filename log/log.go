@@ -41,7 +41,7 @@ func NewLog(client LogClient, sever LogServer) *Log {
 		client = &DefaultClient{}
 	}
 	if sever == nil {
-		create, err := os.Create("./taichi.log")
+		create, err := os.OpenFile("./taichi.log", os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
 			return nil
 		}

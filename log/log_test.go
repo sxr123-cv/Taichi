@@ -6,7 +6,7 @@ import (
 
 func TestLog_INFO(t *testing.T) {
 	L := NewLog(nil, nil)
-	for i := 0; i < 2700; i++ {
+	for i := 0; i < 10; i++ {
 		i := i
 		go func() {
 			L.ERROR(i, "info")

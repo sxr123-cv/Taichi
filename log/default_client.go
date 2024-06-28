@@ -15,10 +15,10 @@ func (d *DefaultClient) ERROR(M ...any) string {
 	return d.Print(ERROR, M...)
 }
 func (d *DefaultClient) DEBUG(M ...any) string {
-	return d.Print(ERROR, M...)
+	return d.Print(DEBUG, M...)
 }
 func (d *DefaultClient) WARN(M ...any) string {
-	return d.Print(ERROR, M...)
+	return d.Print(WARNING, M...)
 }
 func (d *DefaultClient) Print(level int, M ...any) string {
 	var levelStr = "INFO"
@@ -30,7 +30,7 @@ func (d *DefaultClient) Print(level int, M ...any) string {
 	case WARNING:
 		levelStr = "WARNING"
 	case ERROR:
-		levelStr = "WARNING"
+		levelStr = "ERROR"
 	}
 
 	var s = fmt.Sprintf("%s [%s] ", levelStr, time.Now().Format("2006-01-02 15:04:05"))
