@@ -1,47 +1,51 @@
 package log
 
 import (
-	"fmt"
-	"time"
+	"os"
+)
+
+const (
+	DEBUG = iota
+	INFO
+	WARNING
+	ERROR
 )
 
 type Log struct {
-	Level       string
-	StdoutLevel int
-	Msg         string
-	Get         func(a string)
+	LogClient
+	Server LogServer
 }
 
-func (l Log) Out(msg string) {
-	fmt.Printf("[%s][%s]:%s\n", time.Now().Format("2006-01-02 15:04:05"), l.Level, msg)
+func (receiver *Log) INFO(M ...any) {
+	log := receiver.LogClient.INFO(M...)
+	receiver.Server.Out(log)
+
+}
+func (receiver *Log) ERROR(M ...any) {
+	log := receiver.LogClient.ERROR(M...)
+	receiver.Server.Out(log)
 }
 
-type Children struct {
-	Log
+func (receiver *Log) WARN(M ...any) {
+	log := receiver.LogClient.WARN(M...)
+	receiver.Server.Out(log)
+
+}
+func (receiver *Log) DEBUG(M ...any) {
+	log := receiver.LogClient.DEBUG(M...)
+	receiver.Server.Out(log)
 }
 
-func (l Children) Out(msg string) {
-	fmt.Printf("[%s][%s]:%s\n", l.Level, time.Now().Format("2006-01-02 15:04:05"), msg)
-}
-
-var L Children
-
-func INFO(msg string) {
-	L.Level = "INFO"
-	L.Out(msg)
-}
-
-func ERROR(msg string) {
-	L.Level = "ERROR"
-	L.Out(msg)
-}
-
-func DEBUG(msg string) {
-	L.Level = "DEBUG"
-	L.Out(msg)
-}
-
-func WARN(msg string) {
-	L.Level = "WARN"
-	L.Out(msg)
+func NewLog(client LogClient, sever LogServer) *Log {
+	if client == nil {
+		client = &DefaultClient{}
+	}
+	if sever == nil {
+		create, err := os.Create("./taichi.log")
+		if err != nil {
+			return nil
+		}
+		sever = &DefaultServer{file: create}
+	}
+	return &Log{LogClient: client, Server: sever}
 }
