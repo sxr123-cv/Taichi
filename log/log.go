@@ -1,9 +1,5 @@
 package log
 
-import (
-	"os"
-)
-
 const (
 	DEBUG = iota
 	INFO
@@ -36,17 +32,17 @@ func (receiver *Log) DEBUG(M ...any) {
 	receiver.Server.Out(log)
 }
 
+func (receiver *Log) SetFilePath(filePath string) *Log {
+	receiver.Server.FilePath(filePath)
+	return receiver
+}
+
 func NewLog(client LogClient, sever LogServer) *Log {
 	if client == nil {
 		client = &DefaultClient{}
 	}
 	if sever == nil {
-		os.Create("./taichi.log")
-		create, err := os.OpenFile("./taichi.log", os.O_CREATE|os.O_APPEND, 0666)
-		if err != nil {
-			panic(err.Error())
-		}
-		sever = &DefaultServer{file: create}
+		sever = &DefaultServer{}
 	}
 	return &Log{LogClient: client, Server: sever}
 }
