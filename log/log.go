@@ -42,7 +42,10 @@ func NewLog(client LogClient, sever LogServer) *Log {
 		client = &DefaultClient{}
 	}
 	if sever == nil {
-		sever = &DefaultServer{}
+		sever1 := &DefaultServer{p: make(chan string, 10)}
+		sever1.Start()
+		sever = sever1
 	}
+
 	return &Log{LogClient: client, Server: sever}
 }

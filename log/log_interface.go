@@ -14,4 +14,5 @@ type LogClient interface {
 type LogServer interface {
 	Out(log string)
 	FilePath(path string)
+	Close()
 }
