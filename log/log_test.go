@@ -15,7 +15,7 @@ func TestLog_INFO(t *testing.T) {
 	wait := sync.WaitGroup{}
 	for i := 0; i < 10; i++ {
 		wait.Add(1)
-		i := 1
+		i := i
 		go func() {
 			L.ERROR(i, "info")
 			wait.Done()

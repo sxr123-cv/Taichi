@@ -22,7 +22,7 @@ func (d *DefaultServer) Start() {
 				fmt.Printf(v)
 				_, err := d.file.WriteString(v)
 				if err != nil {
-					println("log write error")
+					println("log write error", err.Error())
 				}
 			} else {
 
