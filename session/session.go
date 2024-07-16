@@ -1,9 +1,11 @@
 package session
 
 import (
-	"Taichi/log"
+	"Taichi/sdk"
+	"context"
 	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -14,8 +16,6 @@ type Session struct {
 	PreLoad    any    `json:"pre_load"`
 	SessionKey string `json:"session_key"`
 }
-
-var L = log.NewLog(nil, nil)
 
 func SaveSession(PreLoad any, sec int64) (string, error) {
 	sha := sha256.New()
@@ -31,28 +31,28 @@ func SaveSession(PreLoad any, sec int64) (string, error) {
 	sha.Write(marshal)
 	bytes := sha.Sum(nil)
 	s.SessionKey = fmt.Sprintf("%x", bytes)
-	create, err := os.Create(s.SessionKey)
+	ctx := context.WithValue(context.Background(), "q1111", "2222") //协程 通道
+	err = WriteDataToRedis(s.SessionKey, string(marshal), ctx)
 	if err != nil {
 		return "", err
 	}
-	_, err = create.WriteString(string(marshal))
-	if err != nil {
-		return "", err
-	}
-	create.Close()
 	return s.SessionKey, nil
 }
 
 func VerifySession(session string, preload any) error {
-	content, err := os.ReadFile(session)
+	content, err := ReadDataFormRedis(session)
 	if err != nil {
-		L.INFO(err.Error())
+		sdk.Log.INFO(err.Error())
 		return err
 	}
 	var s Session
 	err = json.Unmarshal(content, &s)
 	if err != nil {
 		return err
+	}
+	if time.Now().Unix() >= s.ExpTime {
+		os.Remove(session)
+		return errors.New("会话过期")
 	}
 	marshal, err := json.Marshal(s.PreLoad)
 	if err != nil {
@@ -67,4 +67,19 @@ func VerifySession(session string, preload any) error {
 type Preload struct {
 	Role   string `json:"role"`
 	UserId int64  `json:"user_id"`
+}
+
+func ReadDataFormRedis(session string) (bytes []byte, err error) {
+	ctx := context.Background()
+	result, err := sdk.Redis.Get(ctx, session).Result()
+	if err != nil {
+		return nil, err
+	}
+	return []byte(result), err
+}
+
+func WriteDataToRedis(session string, jsonData string, ctx context.Context) error {
+	sdk.Log.INFO(ctx.Value("q1111"))
+	return sdk.Redis.Set(ctx, session, jsonData, 6*time.Hour).Err()
+
 }
