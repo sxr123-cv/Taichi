@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Taichi/jwt"
 	"Taichi/middleware"
 	"Taichi/response"
 	"Taichi/session"
@@ -9,7 +10,7 @@ import (
 
 func main() {
 	r := gin.Default()
-	needAuthRouter := r.Group("client").Use(middleware.Auth())
+	needAuthRouter := r.Group("client").Use(middleware.AuthJwt())
 	noAuthRouter := r.Group("client")
 	gin.Logger()
 	var req = LoginRequest{}
@@ -20,7 +21,7 @@ func main() {
 			return
 		}
 		if req.Pwd == "11111" && req.Name == "11111" {
-			saveSession, err := session.SaveSession(session.Preload{
+			saveSession, err := jwt.GetJwt(session.Preload{
 				Role:   "student",
 				UserId: 1,
 			}, 30*60)
