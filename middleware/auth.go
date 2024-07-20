@@ -1,17 +1,17 @@
 package middleware
 
 import (
-	"Taichi/jwt"
+	auth_const "Taichi/auth/const"
+	jwt "Taichi/auth/jwt"
 	"Taichi/response"
-	"Taichi/session"
 	"github.com/gin-gonic/gin"
 )
 
-func Auth() gin.HandlerFunc {
+func AuthJwt() gin.HandlerFunc {
 	return func(context *gin.Context) {
-		key := context.GetHeader("Cookie")
-		var preload session.Preload
-		err := session.VerifySession(key, &preload)
+		jwtData := context.GetHeader("Authorization")
+		var preload auth_const.Preload
+		err := jwt.VerifyJWT(jwtData, &preload)
 		if err != nil {
 			response.Fail("", "参数不正确", response.NOT_PASS_AUTH, context)
 			context.Abort()
@@ -22,17 +22,16 @@ func Auth() gin.HandlerFunc {
 	}
 }
 
-func AuthJwt() gin.HandlerFunc {
+func Logout() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		jwtData := context.GetHeader("Authorization")
-		var preload session.Preload
-		err := jwt.VerifyJWT(jwtData, &preload)
+		var preload auth_const.Preload
+		err := jwt.Logout(jwtData, &preload)
 		if err != nil {
 			response.Fail("", "参数不正确", response.NOT_PASS_AUTH, context)
 			context.Abort()
 			return
 		}
-		context.Set("user", preload)
 		context.Next()
 	}
 }

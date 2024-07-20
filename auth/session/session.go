@@ -1,4 +1,4 @@
-package session
+package auth
 
 import (
 	"Taichi/sdk"
@@ -55,11 +55,6 @@ func VerifySession(session string, preload any) error {
 
 	return nil
 
-}
-
-type Preload struct {
-	Role   string `json:"role"`
-	UserId int64  `json:"user_id"`
 }
 
 func ReadDataFormRedis(session string) (bytes []byte, err error) {
