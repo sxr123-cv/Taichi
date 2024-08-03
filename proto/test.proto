@@ -1,0 +1,15 @@
+syntax="proto3";
+// 包名
+package  test.proto;
+option go_package = "./;test";
+message LoginRequest {
+  string Account =1;
+  string Password =2;
+}
+message LoginResp {
+  string Account=1;
+  string Jwt=2;
+}
+service LoginService {
+  rpc Login(LoginRequest) returns(LoginResp);
+}

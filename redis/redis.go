@@ -1,14 +1,16 @@
 package redis
 
 import (
+	"Taichi/config"
+	"fmt"
 	"github.com/redis/go-redis/v9"
 )
 
-func GetRedis() *redis.Client {
+func GetRedis(redisConfig config.Redis) *redis.Client {
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // 没有密码，默认值
-		DB:       0,  // 默认DB 0
+		Addr:     fmt.Sprintf("%s:%s", redisConfig.Addr, redisConfig.Port),
+		Password: redisConfig.Pwd, // 没有密码，默认值
+		DB:       redisConfig.Db,  // 默认DB 0
 	})
 
 	return rdb

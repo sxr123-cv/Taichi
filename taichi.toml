@@ -1,0 +1,11 @@
+[MySQL]
+usr="root"
+pwd="root"
+addr="127.0.0.1"
+port="3306"
+database="taichi"
+[Redis]
+pwd=""
+addr="127.0.0.1"
+port="6379"
+db=0

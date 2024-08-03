@@ -3,23 +3,42 @@ package main
 import (
 	authconst "Taichi/auth/const"
 	jwt "Taichi/auth/jwt"
+	"Taichi/config"
+	"Taichi/db"
+	"Taichi/db/model"
 	"Taichi/middleware"
 	"Taichi/response"
 	"Taichi/sdk"
-	"context"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	r := gin.Default()
+	readConfig, err := config.ReadConfig()
+	if err != nil {
+		panic(err)
+	}
+	err = db.InitMySQL(readConfig.MySQL)
+	sdk.InitRedis(readConfig.Redis)
+	if err != nil {
+		return
+	}
 	needAuthRouter := r.Group("client").Use(middleware.AuthJwt())
 	noAuthRouter := r.Group("client")
-	gin.Logger()
 	var req = LoginRequest{}
 	noAuthRouter.POST("/login", func(c *gin.Context) {
 		err := c.ShouldBindJSON(&req)
 		if err != nil {
 			response.Fail("", "参数不正确", response.NOT_PASS_AUTH, c)
+			return
+		}
+		err = model.UserModel.InsertUser(&model.User{
+			Id:       0,
+			Name:     "111",
+			Password: "2222",
+			Sex:      "女",
+		})
+		if err != nil {
 			return
 		}
 		if req.Pwd == "11111" && req.Name == "11111" {
@@ -37,6 +56,7 @@ func main() {
 			}
 
 		}
+
 		response.Fail("", "参数不正确", response.NOT_PASS_AUTH, c)
 		return
 	})
@@ -45,18 +65,6 @@ func main() {
 		response.Success(v, "", c)
 		return
 	})
-	needAuthRouter.POST("/reset", func(c *gin.Context) {
-		v, _ := c.Get("user")
-		v1, ok := v.(authconst.Preload)
-		if !ok {
-			response.Fail("FAIL", "参数不正确", response.NOT_PASS_AUTH, c)
-			return
-		}
-		sdk.Redis.Del(context.Background(), v1.GetAuthId())
-		response.Success("OK", "", c)
-		return
-	})
-
 	needAuthRouter.Use(middleware.Logout()).POST("/logout", func(c *gin.Context) {
 		response.Success("OK", "", c)
 		return
